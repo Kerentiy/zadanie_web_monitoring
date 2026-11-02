@@ -1,0 +1,3 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+* * * * * www-data . /run/app-env && /usr/local/bin/php /var/www/html/bin/cron.php >> /proc/1/fd/1 2>&1
