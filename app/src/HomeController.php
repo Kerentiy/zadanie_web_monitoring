@@ -6,6 +6,8 @@ namespace App;
 
 final class HomeController extends AbstractController
 {
+    public function __construct(private readonly AuthService $auth) {}
+
     public function __invoke(Request $request): Response
     {
         $dbStatus = 'доступна';
@@ -16,10 +18,18 @@ final class HomeController extends AbstractController
             $dbStatus = 'ошибка подключения';
         }
 
+        $user = $this->auth->currentUser();
         $content = '<h1>nginx + php-fpm + PostgreSQL</h1>'
             . '<p>PostgreSQL: <strong>' . $this->escape($dbStatus) . '</strong>; записей показано: ' . count($rows) . '</p>'
-            . '<nav class="nav"><a href="/session">Проверить PostgreSQL-сессию</a></nav>'
-            . '<h2>Таблица demo</h2>';
+            . '<nav class="nav"><a href="/session">Проверить PostgreSQL-сессию</a></nav>';
+        if ($user !== null) {
+            $content .= '<p>Вы вошли как <strong>' . $this->escape((string) $user['email']) . '</strong>.</p>'
+                . '<form method="post" action="/logout"><input type="hidden" name="_csrf_token" value="'
+                . $this->escape($this->auth->csrfToken()) . '"><button type="submit">Выйти</button></form>';
+        } else {
+            $content .= '<nav class="nav"><a href="/register">Регистрация</a><a href="/login">Вход</a></nav>';
+        }
+        $content .= '<h2>Таблица demo</h2>';
         if ($rows !== []) {
             $content .= '<table><tr><th>id</th><th>создано</th><th>note</th></tr>';
             foreach ($rows as $row) {

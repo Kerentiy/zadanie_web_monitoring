@@ -103,10 +103,9 @@ clean:
 composer:
 	docker compose exec -u www-data php composer install
 
-# Схемы app_sessions и app_cron_status применяются initdb на новом томе; этот
-# идемпотентный путь нужен для существующего тома pgdata.
+# Идемпотентные схемы сессий, cron и пользователей; нужен для существующего pgdata.
 migrate:
-	docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U $(POSTGRES_USER) -d $(POSTGRES_DB) -f /docker-entrypoint-initdb.d/03-app-features.sql
+	docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U $(POSTGRES_USER) -d $(POSTGRES_DB) -f /docker-entrypoint-initdb.d/03-app-features.sql -f /docker-entrypoint-initdb.d/04-auth.sql
 
 sh:
 	docker compose exec php sh
